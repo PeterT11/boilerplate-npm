@@ -23,7 +23,7 @@ if (!process.env.DISABLE_XORIGIN) {
 }
 
 app.use('/public', express.static(process.cwd() + '/public'));
-
+app.use('/',express.static(__dirname));
 app.route('/_api/package.json')
   .get(function(req, res, next) {
     console.log('requested');
@@ -33,15 +33,31 @@ app.route('/_api/package.json')
     });
   });
   
-app.route('/')
+/*app.route('/')
     .get(function(req, res) {
-		  res.sendFile(process.cwd() + '/views/index.html');
+      
+
     })
+    */
 
 // Respond not found to all the wrong routes
 app.use(function(req, res, next){
-  res.status(404);
-  res.type('txt').send('Not found');
+  let obj = {'unix':null, 'natural':null};
+  let str = decodeURIComponent(req.url).slice(1);
+  console.log(str);
+  let da;
+  if(str.match(/[^\d]+/)){    
+    da = new Date(str);  
+  }else{
+    var u = parseInt(str)*1000;
+    da = new Date(u);
+  }
+  if(!isNaN(da.valueOf())){
+    obj.natural = da.toString();
+    obj.unix = Number(da.getTime()/1000).toFixed(0);
+  } 
+  console.log(obj);
+  res.end(JSON.stringify(obj));  
 });
 
 // Error Middleware
@@ -53,7 +69,7 @@ app.use(function(err, req, res, next) {
   }  
 })
 
-app.listen(process.env.PORT, function () {
-  console.log('Node.js listening ...');
+app.listen(3000, function () {
+  console.log('Node.js listening 3000...');
 });
 
